@@ -1,15 +1,53 @@
 import { Stack } from "expo-router";
-import './globals.css';
+import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink } from "@apollo/client";
+import { setContext } from "@apollo/client/link/context";
+import { getItemAsync } from "expo-secure-store";
+import { useEffect, useState } from "react";
+import "./globals.css";
+
+const TOKEN_KEY = "userToken";
 
 export default function RootLayout() {
-  return <Stack>
-    <Stack.Screen 
-      name="(tabs)"
-      options={{ headerShown: false }}
-    />
-    {/* <Stack.Screen 
-      name="prevEntries/[id]"
-      options={{ headerShown: false }}
-    /> */}
-  </Stack>;
+  const [client, setClient] = useState<ApolloClient<any> | null>(null);
+
+  useEffect(() => {
+    const setupApollo = async () => {
+      const httpLink = createHttpLink({
+        uri: "http://192.168.1.151:4000/graphql", // Replace with your machine's actual local IP
+      });
+
+      const authLink = setContext(async (_, { headers }) => {
+        const token = await getItemAsync(TOKEN_KEY);
+        console.log("📤 Sending token in header:", token);
+
+        return {
+          headers: {
+            ...headers,
+            authorization: token ? `Bearer ${token}` : "",
+          },
+        };
+      });
+
+      const apolloClient = new ApolloClient({
+        link: authLink.concat(httpLink),
+        cache: new InMemoryCache(),
+      });
+
+      setClient(apolloClient);
+    };
+
+    setupApollo();
+  }, []);
+
+  if (!client) return null;
+
+  return (
+    <ApolloProvider client={client}>
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+      </Stack>
+    </ApolloProvider>
+  );
 }
+

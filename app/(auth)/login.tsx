@@ -38,7 +38,7 @@ const Login = () => {
       await saveToken(token);
 
       Alert.alert("Success", `Welcome back, ${data.login.username}!`);
-      router.replace("/profile");
+      router.replace("/");
       } catch (err: any) {
         console.error("🧨 Login error:", JSON.stringify(err, null, 2));
 

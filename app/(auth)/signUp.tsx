@@ -25,7 +25,7 @@ const SignUp = () => {
       const { data } = await addUser({ variables: { username, email, password } });
       const token = data.addUser.token;
       await saveToken(token);
-      router.replace('/profile');
+      router.replace('/');
       console.log('Token:', token);
       Alert.alert('Success', `Welcome, ${data.addUser.username}!`);
     } catch (err: any) {

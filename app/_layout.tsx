@@ -13,7 +13,7 @@ export default function RootLayout() {
   useEffect(() => {
     const setupApollo = async () => {
       const httpLink = createHttpLink({
-        uri: "http://192.168.1.151:4000/graphql", // Replace with your machine's actual local IP
+        uri: "http://192.168.1.6:4000/graphql", // Replace with your machine's actual local IP
       });
 
       const authLink = setContext(async (_, { headers }) => {

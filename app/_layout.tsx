@@ -4,6 +4,7 @@ import { setContext } from "@apollo/client/link/context";
 import { getItemAsync } from "expo-secure-store";
 import { useEffect, useState } from "react";
 import "./globals.css";
+import Constants from 'expo-constants';
 
 const TOKEN_KEY = "userToken";
 
@@ -13,7 +14,7 @@ export default function RootLayout() {
   useEffect(() => {
     const setupApollo = async () => {
       const httpLink = createHttpLink({
-        uri: "http://192.168.1.6:4000/graphql", // Replace with your machine's actual local IP
+        uri: `http://${Constants.expoConfig?.extra?.localIP}:4000/graphql`, // Replace with your machine's actual local IP
       });
 
       const authLink = setContext(async (_, { headers }) => {
@@ -50,4 +51,3 @@ export default function RootLayout() {
     </ApolloProvider>
   );
 }
-

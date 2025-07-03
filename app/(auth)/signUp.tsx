@@ -3,6 +3,7 @@ import { gql, useMutation } from '@apollo/client';
 import React, { useState } from 'react';
 import { saveToken } from '../../utils/tokenStorage';
 import { router } from 'expo-router';
+import Constants from 'expo-constants';
 
 const ADD_USER = gql`
   mutation AddUser($username: String!, $email: String!, $password: String!) {

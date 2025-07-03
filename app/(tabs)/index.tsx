@@ -6,14 +6,6 @@ export default function Index() {
     <View className="flex-1 justify-center items-center space-y-4">
       <Text className="text-5xl text-accent font-bold">Pineapple</Text>
 
-      <TouchableOpacity onPress={() => router.replace("/signUp")}>
-        <Text className="text-black text-lg">Sign Up</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={() => router.replace("/login")}>
-        <Text className="text-black text-lg">Log In</Text>
-      </TouchableOpacity>
-
       <TouchableOpacity onPress={() => router.push("/newEntry")}>
         <Text className="text-black text-lg">New Entry</Text>
       </TouchableOpacity>

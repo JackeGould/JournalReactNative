@@ -1,40 +1,23 @@
 // app/(auth)/_layout.tsx
-import { Stack, Link } from "expo-router";
-import { Text } from "react-native";
-
-
+import { Stack } from "expo-router";
 
 export const unstable_settings = {
-  // 👇 This hides (auth) from the header trail
-  initialRouteName: "login",
+  // This hides the (auth) folder name from header titles
+  initialRouteName: "index",
 };
 
 export default function AuthLayout() {
   return (
     <Stack>
-        <Stack.Screen
-        name="login"
-        options={{
-            title: "Login",
-            headerLeft: () => (
-            <Link href="/" style={{ marginLeft: 10 }}>
-                <Text style={{ color: "#007aff" }}>Home</Text>
-            </Link>
-            ),
-        }}
-        />
       <Stack.Screen
-        name="signUp"
+        name="index"
         options={{
-          title: "Sign Up",
-          headerLeft: () => (
-            <Link href="/" style={{ marginLeft: 10 }}>
-                <Text style={{ color: "#007aff" }}>Home</Text>
-            </Link>
-            ),
+          title: "Welcome",
+          headerShown: false, // You can set to true if you want a header
         }}
       />
     </Stack>
   );
 }
+
 

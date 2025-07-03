@@ -10,10 +10,9 @@ const typeDefs = gql`
   }
 
   type Post {
-    _id: string;
-    title: string;
-    content: string;
-    author: User
+    _id: String!
+    title: String!
+    message: String
   }
 
   type Query {
@@ -32,7 +31,7 @@ const typeDefs = gql`
   type Mutation {
     addUser(username: String!, email: String!, password: String!): AuthPayload!
     login(email: String!, password: String!): AuthPayload!
-    createPost(title: String!, content: String!, author: String!): Post
+    createPost(title: String!, message: String): Post
   }
 `;
 

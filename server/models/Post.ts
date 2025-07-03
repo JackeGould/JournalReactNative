@@ -3,8 +3,8 @@ import mongoose, { Document, Schema, Types } from 'mongoose';
 export interface IPost extends Document {
   _id: string;
   title: string;
-  content: string;
-  author: Schema.Types.ObjectId
+  message: string;
+  // author: Schema.Types.ObjectId
   createdAt: Date;
   updatedAt: Date;
 }
@@ -17,17 +17,18 @@ const PostSchema = new Schema<IPost>(
       trim: true,
       maxlength: 100
     },
-    content: {
+    message: {
       type: String,
-      required: true,
+      required: false,
       trim: true,
-      maxlength: 10000,
+      // maxlength: 10000,
     },
-    author: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
-    }   //  createdAt and updatedAt automatically created
+    // author: {
+    //   type: Schema.Types.ObjectId,
+    //   ref: 'User',
+    //   required: true
+    // }
+//  createdAt and updatedAt automatically created
   },
   {
     timestamps: true,

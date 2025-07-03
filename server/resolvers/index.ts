@@ -68,20 +68,20 @@ const resolvers = {
     },
     createPost : async (
       _: any, 
-      { title, content } : { title: string, content: string }, 
+      { title, message } : { title: string, message: string }, 
       context: any
     ) => {
-      if (context.user._id) {
-        const post = await Post.create(
-          { title: title },
-          { content: content },
-          { author: context.username }
-        )
+
+      console.log(title);
+      console.log(message);
+      
+      const post = await Post.create(
+        { title: title },
+        { message: message },
+      )
 
         return post;
       }
-      throw AuthenticationError;
-    }
 
     // createPost: async (
     //   _: any,

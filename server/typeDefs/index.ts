@@ -12,7 +12,7 @@ const typeDefs = gql`
   type Post {
     _id: String!
     title: String!
-    message: String
+    message: String!
   }
 
   type Query {
@@ -31,7 +31,7 @@ const typeDefs = gql`
   type Mutation {
     addUser(username: String!, email: String!, password: String!): AuthPayload!
     login(email: String!, password: String!): AuthPayload!
-    createPost(title: String!, message: String): Post
+    createPost(title: String!, message: String!): Post
   }
 `;
 

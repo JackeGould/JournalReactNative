@@ -68,19 +68,20 @@ const resolvers = {
     },
     createPost : async (
       _: any, 
-      { title, message } : { title: string, message: string }, 
-      context: any
+      { title, message } : { title: string, message: string }
     ) => {
 
       console.log(title);
       console.log(message);
       
       const post = await Post.create(
-        { title: title },
-        { message: message },
+        { 
+          title, 
+          message 
+        },
       )
 
-        return post;
+      return post;
       }
 
     // createPost: async (

@@ -6,7 +6,7 @@ export interface IUser extends Document {
   username: string;
   email: string;
   password: string;
-  // post: Schema.Types.ObjectId
+  posts: Schema.Types.ObjectId
 }
 
 const UserSchema = new Schema<IUser>(
@@ -23,11 +23,11 @@ const UserSchema = new Schema<IUser>(
       type: String, 
       required: true 
     },
-    // post: {
-    //   type: Schema.Types.ObjectId,
-    //   ref: "Post",
-    //   required: false
-    // }
+    posts: {
+      type: Schema.Types.ObjectId,
+      ref: "Post",
+      required: false
+    }
   }, 
   { 
     toJSON: {

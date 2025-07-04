@@ -4,7 +4,7 @@ export interface IPost extends Document {
   _id: string;
   title: string;
   message: string;
-  // author: Schema.Types.ObjectId
+  author: Schema.Types.ObjectId
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,13 +21,13 @@ const PostSchema = new Schema<IPost>(
       type: String,
       required: true,
       trim: true,
-      // maxlength: 10000,
+      maxlength: 10000,
     },
-    // author: {
-    //   type: Schema.Types.ObjectId,
-    //   ref: 'User',
-    //   required: true
-    // }
+    author: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    }
 //  createdAt and updatedAt automatically created
   },
   {

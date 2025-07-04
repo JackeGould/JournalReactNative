@@ -15,7 +15,10 @@ const resolvers = {
     },
 
     postsByMe: async (_: any, __: any, context: any) => {
-      return Post.findById(context.user._id)
+      const posts = await Post.find({ author: context.user._id })
+
+      console.log(posts);
+      return posts
     },
   },
   Mutation: {
@@ -31,7 +34,11 @@ const resolvers = {
       const savedUser = await newUser.save();
 
       const token = jwt.sign(
-        { _id: savedUser._id, username: savedUser.username },
+        { 
+          _id: savedUser._id, 
+          username: savedUser.username,
+          email: savedUser.email
+        },
         process.env.JWT_SECRET!,
         { expiresIn: "7d" }
       );
@@ -54,7 +61,11 @@ const resolvers = {
       if (!valid) throw new Error("Incorrect password");
 
       const token = jwt.sign(
-        { _id: user._id, username: user.username },
+        { 
+          _id: user._id, 
+          username: user.username,
+          email: email
+        },
         process.env.JWT_SECRET!,
         { expiresIn: "7d" }
       );
@@ -72,15 +83,29 @@ const resolvers = {
       context: any
     ) => {
       
-      const post = await Post.create(
-        { 
-          title, 
-          message 
-        },
-      )
+      console.log(context)
 
-      return post;
+      if (context.user) {
+        const post = await Post.create(
+          { 
+            title, 
+            message,
+            author: context.user._id
+          },
+        )
+
+        await User.findOneAndUpdate(
+          { _id: context.user._id },
+          { $addToSet: { posts: post._id } },
+          { runValidators: true, new: true }
+        )
+
+        console.log(post)
+
+        return post;
       }
+      throw AuthenticationError;
+    }
 
     // createPost: async (
     //   _: any,

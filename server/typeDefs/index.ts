@@ -3,16 +3,18 @@ import { gql } from "apollo-server-express";
 
 const typeDefs = gql`
   type User {
-    id: ID!
+    _id: ID!
     username: String!
     email: String
     token: String
+    posts: [Post]
   }
 
   type Post {
     _id: String!
     title: String!
     message: String!
+    author: User!
   }
 
   type Query {

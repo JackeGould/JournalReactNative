@@ -17,7 +17,6 @@ const resolvers = {
     postsByMe: async (_: any, __: any, context: any) => {
       const posts = await Post.find({ author: context.user._id })
 
-      console.log(posts);
       return posts
     },
   },

@@ -1,4 +1,3 @@
-// index.ts
 import express, { Application } from "express";
 import { ApolloServer } from "apollo-server-express";
 import mongoose from "mongoose";
@@ -7,18 +6,41 @@ import typeDefs from "./typeDefs/index";
 import resolvers from "./resolvers/index";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import path from "path";
+import fs from "fs";
+import { upload } from "./middleware/uploads"; // multer setup
 
 dotenv.config();
 
 const startServer = async () => {
   const app: Application = express();
 
-  app.use(
-    cors({
-      origin: "*",
-      credentials: true,
-    })
-  );
+  const allowedOrigin = "http://localhost:8081";
+
+  app.use(cors({
+    origin: ['http://localhost:8081', 'https://studio.apollographql.com'],
+    credentials: true,
+  }));
+
+
+  app.use(express.json());
+
+  // Serve image files
+  const uploadsDir = path.join(__dirname, "uploads");
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir);
+  }
+  app.use("/uploads", express.static(uploadsDir));
+
+  // Upload route
+  app.post("/uploads", upload.single("profileImage"), (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+    res.json({ imageUrl });
+  });
 
   const server = new ApolloServer({
     typeDefs,
@@ -43,13 +65,24 @@ const startServer = async () => {
   });
 
   await server.start();
-  server.applyMiddleware({ app });
+  server.applyMiddleware({
+    app,
+    cors: {
+      origin: ['http://localhost:8081', 'https://studio.apollographql.com'],
+      credentials: true,
+    },
+  });
+
 
   await mongoose.connect(process.env.MONGO_URI!);
 
-  app.listen({ port: process.env.PORT || 4000 }, () => {
-    console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`);
+  const PORT = process.env.PORT || 4000;
+  app.listen(PORT, () => {
+    console.log(`🚀 GraphQL at http://localhost:${PORT}${server.graphqlPath}`);
+    console.log(`📁 Uploads at http://localhost:${PORT}/uploads`);
   });
 };
 
 startServer();
+
+

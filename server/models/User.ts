@@ -6,7 +6,11 @@ export interface IUser extends Document {
   username: string;
   email: string;
   password: string;
-  posts: Schema.Types.ObjectId
+  posts: Schema.Types.ObjectId;
+  profileImage?: string;
+  bio: string;
+  mood: string;
+  moodDate: string;
 }
 
 const UserSchema = new Schema<IUser>(
@@ -27,8 +31,24 @@ const UserSchema = new Schema<IUser>(
       type: Schema.Types.ObjectId,
       ref: "Post",
       required: false
-    }
-  }, 
+    },
+    profileImage: {
+      type: String,
+      required: false
+    },
+    bio: {
+      type: String,
+      default: "",
+    },
+    mood: {
+      type: String,
+      default: null,
+    },
+    moodDate: {
+      type: String, 
+      default: null,
+    },
+  },
   { 
     toJSON: {
       virtuals: true

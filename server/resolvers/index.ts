@@ -104,7 +104,50 @@ const resolvers = {
         return post;
       }
       throw AuthenticationError;
-    }
+    },
+    updateProfileImage: async (
+      _: any,
+      { imageUrl }: { imageUrl: string },
+      context: any
+    ) => {
+      if (!context.user) throw new Error("Not authenticated");
+
+      const updatedUser = await User.findByIdAndUpdate(
+        context.user._id,
+        { profileImage: imageUrl },
+        { new: true }
+      );
+
+      return updatedUser;
+    },
+    updateBio: async (_: any, { bio }: { bio: string }, context: any) => {
+      if (!context.user) throw new Error("Not authenticated");
+
+      return await User.findByIdAndUpdate(
+        context.user._id,
+        { bio },
+        { new: true }
+      );
+    },
+    updateMood: async (
+      _: any,
+      { mood, moodDate }: { mood: string; moodDate: string },
+      context: any
+    ) => {
+      if (!context.user) throw new Error("Not authenticated");
+
+      const updatedUser = await User.findByIdAndUpdate(
+        context.user._id,
+        { mood, moodDate },
+        { new: true }
+      );
+
+      return {
+        mood: updatedUser?.mood,
+        moodDate: updatedUser?.moodDate,
+      };
+    },
+
 
     // createPost: async (
     //   _: any,

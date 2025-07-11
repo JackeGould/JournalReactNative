@@ -1,7 +1,17 @@
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
 import { useMutation } from '@apollo/client';
-import { CREATE_POST } from '../utils/mutations';
+import { gql } from '@apollo/client'
+
+const CREATE_POST = gql`
+  mutation Mutation($title: String!, $message: String!) {
+    createPost(title: $title, message: $message) {
+      _id
+      message
+      title
+    }
+  }
+`;
 
 // Define the mutation result type
 interface CreatePostData {

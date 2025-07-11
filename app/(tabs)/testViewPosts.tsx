@@ -1,7 +1,18 @@
 import { useQuery } from '@apollo/client'
 import React from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { READ_ALL_POSTS } from '../utils/queries'
+import { gql } from "@apollo/client";
+
+const READ_ALL_POSTS = gql`
+  query PostsByMe {
+    postsByMe {
+      _id
+      title
+      message
+    }
+  }
+`;
+
 
 type PostItem = {
   title: string

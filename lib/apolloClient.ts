@@ -29,5 +29,6 @@ export const createApolloClient = (token: string | null) => {
   return new ApolloClient({
     link: authLink.concat(httpLink),
     cache: new InMemoryCache(),
+    credentials: 'include',
   });
 };

@@ -15,6 +15,7 @@ interface AuthContextType {
   apolloClient: ApolloClient<any> | null;
   login: (token: string) => Promise<void>;
   logout: () => Promise<void>;
+  resetClient: () => Promise<void>; // ✅ NEW
   authLoading: boolean;
 }
 
@@ -30,22 +31,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [apolloClient, setApolloClient] = useState<ApolloClient<any> | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
 
+  const initClient = async () => {
+    const token = await getToken();
+    setUserToken(token);
+
+    if (token) {
+      setUser({ token });
+    } else {
+      setUser(null);
+    }
+
+    const client = createApolloClient(token);
+    setApolloClient(client);
+
+    console.log("🔄 Apollo client (re)initialized.");
+  };
+
   useEffect(() => {
-    const loadUser = async () => {
-      const token = await getToken();
-      setUserToken(token);
-
-      if (token) {
-        setUser({ token });
-      }
-
-      const client = createApolloClient(token);
-      setApolloClient(client);
-
+    (async () => {
+      await initClient();
       setAuthLoading(false);
-    };
-
-    loadUser();
+    })();
   }, []);
 
   const login = async (token: string) => {
@@ -70,9 +76,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     console.log("🗑️ Logged out and Apollo client rebuilt.");
   };
 
+  const resetClient = initClient; // ✅ expose client reinit
+
   return (
     <AuthContext.Provider
-      value={{ user, userToken, apolloClient, login, logout, authLoading }}
+      value={{ user, userToken, apolloClient, login, logout, resetClient, authLoading }}
     >
       {children}
     </AuthContext.Provider>
@@ -86,3 +94,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

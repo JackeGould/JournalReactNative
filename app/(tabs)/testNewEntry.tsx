@@ -1,7 +1,6 @@
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
-import { useMutation } from '@apollo/client';
-import { gql } from '@apollo/client'
+import { useMutation, gql } from '@apollo/client';
 
 const CREATE_POST = gql`
   mutation Mutation($title: String!, $message: String!) {

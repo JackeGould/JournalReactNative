@@ -3,7 +3,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import Anthropic from '@anthropic-ai/sdk';
 
 const anthropic = new Anthropic({
-  apiKey: process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY
+  apiKey: process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY,
+  dangerouslyAllowBrowser: true
 });
 
 const TestAI = () => {

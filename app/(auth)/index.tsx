@@ -1,10 +1,9 @@
-// app/(auth)/index.tsx
-
 import { StyleSheet, Text, TextInput, View, Button, Alert } from 'react-native';
 import { gql, useMutation } from '@apollo/client';
 import React, { useState } from 'react';
 import { router } from 'expo-router';
 import { saveToken } from '../../utils/tokenStorage';
+import { useAuth } from '../../context/authContext'; // ✅ import useAuth
 
 const LOGIN_USER = gql`
   mutation Login($email: String!, $password: String!) {
@@ -33,50 +32,52 @@ export default function AuthScreen() {
   const [loginUser, { loading: loginLoading }] = useMutation(LOGIN_USER);
   const [addUser, { loading: signUpLoading }] = useMutation(ADD_USER);
 
-    const handleAuth = async () => {
+  const { resetClient } = useAuth(); // ✅ destructure from context
+
+  const handleAuth = async () => {
     if (!email || !password || (!isLogin && !username)) {
-        Alert.alert('Missing Fields', 'Please fill out all fields.');
-        return;
+      Alert.alert('Missing Fields', 'Please fill out all fields.');
+      return;
     }
 
     try {
-        if (isLogin) {
+      if (isLogin) {
         const { data } = await loginUser({ variables: { email, password } });
 
         if (!data?.login?.token) {
-            Alert.alert('Login Failed', 'No token received.');
-            return;
+          Alert.alert('Login Failed', 'No token received.');
+          return;
         }
 
         await saveToken(data.login.token);
+        await resetClient(); // ✅ refresh Apollo Client with new token
         Alert.alert('Success', `Welcome back, ${data.login.username}!`);
-        } else {
+      } else {
         const { data } = await addUser({ variables: { username, email, password } });
 
         if (!data?.addUser?.token) {
-            Alert.alert('Sign Up Failed', 'No token received.');
-            return;
+          Alert.alert('Sign Up Failed', 'No token received.');
+          return;
         }
 
         await saveToken(data.addUser.token);
+        await resetClient(); // ✅ refresh Apollo Client with new token
         Alert.alert('Success', `Welcome, ${data.addUser.username}!`);
-        }
+      }
 
-        // ✅ Go to profile page after success
-        router.replace('/profile');
+      router.replace('/profile');
     } catch (err: any) {
-        console.error('🧨 Auth error:', JSON.stringify(err, null, 2));
+      console.error('🧨 Auth error:', JSON.stringify(err, null, 2));
 
-        if (err.graphQLErrors?.length > 0) {
+      if (err.graphQLErrors?.length > 0) {
         Alert.alert('Error', err.graphQLErrors[0].message);
-        } else if (err.networkError) {
+      } else if (err.networkError) {
         Alert.alert('Network Error', 'Unable to reach the server.');
-        } else {
+      } else {
         Alert.alert('Error', 'Something went wrong. Please try again.');
-        }
+      }
     }
-};
-
+  };
 
   return (
     <View style={styles.container}>
@@ -113,7 +114,15 @@ export default function AuthScreen() {
       />
 
       <Button
-        title={isLogin ? (loginLoading ? 'Logging In...' : 'Log In') : signUpLoading ? 'Signing Up...' : 'Sign Up'}
+        title={
+          isLogin
+            ? loginLoading
+              ? 'Logging In...'
+              : 'Log In'
+            : signUpLoading
+            ? 'Signing Up...'
+            : 'Sign Up'
+        }
         onPress={handleAuth}
         disabled={loginLoading || signUpLoading}
       />
@@ -153,3 +162,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+

@@ -50,7 +50,7 @@ const Profile = () => {
   const [bio, setBio] = useState('');
   const [editingBio, setEditingBio] = useState(false);
   const [selectedMood, setSelectedMood] = useState<string | null>(null); // saved mood
-  const [tempMood, setTempMood] = useState<string | null>(null); // unsaved mood
+  const [tempMood, setTempMood] = useState<string>(""); // unsaved mood
 
   // Get today's date
   const today = new Date().toISOString().split("T")[0];
@@ -185,7 +185,7 @@ const Profile = () => {
                   ))}
               </Picker>
             </View>
-            <Pressable onPress={() => tempMood && handleMoodChange(tempMood)}>
+            <Pressable onPress={() => tempMood !== "" && handleMoodChange(tempMood)}>
               <Text style={styles.saveButton}>Confirm Mood</Text>
             </Pressable>
           </>

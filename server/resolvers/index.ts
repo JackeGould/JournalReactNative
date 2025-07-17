@@ -13,11 +13,16 @@ const resolvers = {
       const user = await User.findById(context.user._id);
       return user;
     },
+    postsByMe: async (_: any, __: any, { user }: any) => {
+      const posts = await Post.find({ author: user._id })
+        .sort({ createdAt: -1 })
+        .lean();
 
-    postsByMe: async (_: any, __: any, context: any) => {
-      const posts = await Post.find({ author: context.user._id })
-
-      return posts
+      return posts.map((post) => ({
+        ...post,
+        createdAt: new Date(post.createdAt).toISOString(),
+        updatedAt: new Date(post.updatedAt).toISOString(),
+      }));
     },
   },
   Mutation: {

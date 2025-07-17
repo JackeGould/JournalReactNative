@@ -20,6 +20,7 @@ const typeDefs = gql`
     _id: String!
     title: String!
     message: String!
+    createdAt: String!
     author: User!
   }
 

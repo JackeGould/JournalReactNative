@@ -1,13 +1,17 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   Text,
   View,
   ActivityIndicator,
   ScrollView,
+  Pressable,
+  TouchableOpacity,
+  StyleSheet,
 } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { useQuery, gql } from "@apollo/client";
 import dayjs from "dayjs";
+import { Calendar } from "react-native-calendars";
 
 const READ_ALL_POSTS = gql`
   query PostsByMe {
@@ -24,7 +28,7 @@ type PostItem = {
   _id: string;
   title: string;
   message: string;
-  createdAt: string; 
+  createdAt: string;
 };
 
 type QueryData = {
@@ -36,23 +40,40 @@ export default function Index() {
     fetchPolicy: "network-only",
   });
 
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedPost, setSelectedPost] = useState<PostItem | null>(null);
+  const [showCalendar, setShowCalendar] = useState<boolean>(true);
+
   useFocusEffect(
     useCallback(() => {
       refetch();
     }, [refetch])
   );
 
-  const posts = data?.postsByMe || [];
+  const posts = useMemo(() => data?.postsByMe || [], [data]);
 
-  // ✅ Only log after loading completes
-  if (!loading) {
-    console.log("Today:", dayjs().format("YYYY-MM-DD"));
-    console.log("🔍 Raw post createdAt values:", posts.map((p) => p.createdAt));
-    console.log(
-      "📝 Formatted post dates:",
-      posts.map((p) => dayjs(p.createdAt).format("YYYY-MM-DD"))
-    );
-  }
+  const markedDates = useMemo(() => {
+    const marks: { [key: string]: any } = {};
+
+    posts.forEach((post) => {
+      const dateKey = dayjs(post.createdAt).format("YYYY-MM-DD");
+      marks[dateKey] = {
+        ...(marks[dateKey] || {}),
+        marked: true,
+        dotColor: "#007aff", // can be replaced later
+      };
+    });
+
+    if (selectedDate) {
+      marks[selectedDate] = {
+        ...(marks[selectedDate] || {}),
+        selected: true,
+        selectedColor: "#007aff",
+      };
+    }
+
+    return marks;
+  }, [posts, selectedDate]);
 
   const hasPostToday = posts.some(
     (post) =>
@@ -60,34 +81,89 @@ export default function Index() {
       dayjs().format("YYYY-MM-DD")
   );
 
+  const filteredPosts = useMemo(() => {
+    if (!selectedDate) {
+      return [...posts].sort(
+        (a, b) =>
+          dayjs(b.createdAt).valueOf() - dayjs(a.createdAt).valueOf()
+      );
+    }
+
+    return posts.filter(
+      (post) =>
+        dayjs(post.createdAt).format("YYYY-MM-DD") === selectedDate
+    );
+  }, [posts, selectedDate]);
+
   return (
-    <ScrollView className="flex-1 px-6 pt-12 space-y-6">
-      <View className="items-center space-y-4">
-        <Text className="text-3xl text-accent font-bold">Your Posts</Text>
+    <ScrollView style={styles.container}>
+      <View style={styles.header}>
+        <Text>Your Posts</Text>
       </View>
 
-      {!hasPostToday && (
-        <View className="bg-yellow-100 border-l-4 border-yellow-500 p-4 mt-6 rounded-md">
-          <Text className="text-yellow-900 font-medium text-base">
-            Don&apos;t forget to write your post for today!
-          </Text>
+      {!hasPostToday && !selectedDate && (
+        <View style={styles.reminderBox}>
+          <Text>Don&apos;t forget to write your post for today!</Text>
         </View>
       )}
 
-      <View className="mt-8">
+      <TouchableOpacity
+        onPress={() => setShowCalendar((prev) => !prev)}
+        style={styles.toggleButton}
+      >
+        <Text>{showCalendar ? "Hide Calendar ▲" : "Show Calendar ▼"}</Text>
+      </TouchableOpacity>
+
+      {showCalendar && (
+        <Calendar
+          markedDates={markedDates}
+          onDayPress={(day) => {
+            setSelectedDate((prev) =>
+              prev === day.dateString ? null : day.dateString
+            );
+            setSelectedPost(null);
+          }}
+          style={styles.calendar}
+        />
+      )}
+
+      <View style={styles.postList}>
         {loading ? (
-          <ActivityIndicator size="large" color="#000" />
-        ) : posts.length === 0 ? (
-          <Text className="text-center text-gray-500">No posts found.</Text>
-        ) : (
-          posts.map((item) => (
-            <View key={item._id} className="bg-gray-100 p-4 rounded-lg mb-4">
-              <Text className="text-lg font-bold mb-1">{item.title}</Text>
-              <Text className="text-gray-500 text-sm mb-2">
-                {dayjs(item.createdAt).format("MMM D, YYYY")}
-              </Text>
-              <Text className="text-gray-700">{item.message}</Text>
+          <ActivityIndicator size="large" />
+        ) : selectedPost ? (
+          <View style={styles.selectedPost}>
+            <Text>{selectedPost.title}</Text>
+            <Text>{dayjs(selectedPost.createdAt).format("MMMM D, YYYY")}</Text>
+            <Text>{selectedPost.message}</Text>
+
+            <View style={styles.actionRow}>
+              <TouchableOpacity style={styles.editButton} onPress={() => {}}>
+                <Text>Edit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.deleteButton} onPress={() => {}}>
+                <Text>Delete</Text>
+              </TouchableOpacity>
             </View>
+
+            <TouchableOpacity onPress={() => setSelectedPost(null)}>
+              <Text>← Back to list</Text>
+            </TouchableOpacity>
+          </View>
+        ) : filteredPosts.length === 0 ? (
+          <Text>No posts found for {selectedDate}.</Text>
+        ) : (
+          filteredPosts.map((item) => (
+            <Pressable
+              key={item._id}
+              onPress={() => setSelectedPost(item)}
+              style={styles.postItem}
+            >
+              <Text>{item.title}</Text>
+              <Text>{dayjs(item.createdAt).format("MMM D, YYYY")}</Text>
+              <Text numberOfLines={2} ellipsizeMode="tail">
+                {item.message}
+              </Text>
+            </Pressable>
           ))
         )}
       </View>
@@ -95,7 +171,56 @@ export default function Index() {
   );
 }
 
-
-
-
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 48,
+  },
+  header: {
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  reminderBox: {
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  toggleButton: {
+    alignSelf: "flex-end",
+    marginBottom: 8,
+  },
+  calendar: {
+    borderRadius: 10,
+    marginBottom: 16,
+  },
+  postList: {
+    marginTop: 16,
+  },
+  postItem: {
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  selectedPost: {
+    padding: 16,
+    borderRadius: 8,
+  },
+  actionRow: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 16,
+    gap: 12,
+  },
+  editButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+  },
+  deleteButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+  },
+});
 
